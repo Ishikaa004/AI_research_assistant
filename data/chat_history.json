@@ -1,0 +1,498 @@
+[
+    {
+        "type": "human",
+        "content": ""
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": "Generative AI (GenAI) is a branch of artificial intelligence that can generate new content such as text, images, audio, and code."
+    },
+    {
+        "type": "human",
+        "content": "what is transformer?"
+    },
+    {
+        "type": "ai",
+        "content": "Transformers are neural network architectures designed to process sequences using attention mechanisms."
+    },
+    {
+        "type": "human",
+        "content": "what are its applications?"
+    },
+    {
+        "type": "ai",
+        "content": "Based on the provided context, generative AI’s applications include:\n\n- **Generating new content** such as text, images, audio, and code.  \n- **Modeling relationships between words and tokens** to improve natural‑language processing.  \n- **Comparing the semantic meaning of different pieces of text**.  \n- **Storing numerical representations in a vector database** for efficient similarity search."
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": "Generative AI, often abbreviated as GenAI, is a branch of artificial intelligence that can generate new content such as text, images, audio, and code."
+    },
+    {
+        "type": "human",
+        "content": "What are the applications of Generative AI?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what can it generate?"
+    },
+    {
+        "type": "ai",
+        "content": "It can generate new content such as text, images, audio, and code."
+    },
+    {
+        "type": "human",
+        "content": "what is genai"
+    },
+    {
+        "type": "ai",
+        "content": "GenAI is short for **Generative AI**—a branch of artificial intelligence that can create new content such as text, images, audio, and code."
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": ""
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": ""
+    },
+    {
+        "type": "human",
+        "content": ""
+    },
+    {
+        "type": "ai",
+        "content": ""
+    },
+    {
+        "type": "human",
+        "content": ""
+    },
+    {
+        "type": "ai",
+        "content": ""
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": "Generative AI is a branch of artificial intelligence that can generate new content such as text, images, audio, and code."
+    },
+    {
+        "type": "human",
+        "content": "what can it generate?"
+    },
+    {
+        "type": "ai",
+        "content": "It can generate new content such as text, images, audio, and code."
+    },
+    {
+        "type": "human",
+        "content": "why is it useful?"
+    },
+    {
+        "type": "ai",
+        "content": "It’s useful because it can:\n\n- **Generate new content** such as text, images, audio, and code, which saves time and effort in creative and production workflows.  \n- **Model relationships between words and tokens**, improving natural‑language processing tasks.  \n- **Compare the semantic meaning of different pieces of text**, helping with tasks like summarization, question answering, or content recommendation.  \n- **Store numerical representations in a vector database** for efficient similarity search, enabling quick retrieval of related information."
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": "Answer:\nGenerative AI (GenAI) is a branch of artificial intelligence that can generate new content such as text, images, audio, and code.\n\nSource:\ncontext"
+    },
+    {
+        "type": "human",
+        "content": "what can it generate?"
+    },
+    {
+        "type": "ai",
+        "content": "Answer:\nIt can generate new content such as text, images, audio, and code, and it can also produce answers.\n\nSource:\ncontext\n\nConversation history:\nhuman: what can it generate?"
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": "Answer:\nGenerative AI (GenAI) is a branch of artificial intelligence that can generate new content such as text, images, audio, and code.\n\nSource:\ndata\\research.txt\n\nConversation history:\nhuman: what is genai?"
+    },
+    {
+        "type": "human",
+        "content": "what can it generate?"
+    },
+    {
+        "type": "ai",
+        "content": "Answer:\nIt can generate new content such as text, images, audio, and code, and it can also generate an answer.\n\nSource:\ndata\\research.txt, data\\rag.txt\n\nConversation history:\nhuman: what can it generate?"
+    },
+    {
+        "type": "human",
+        "content": "Who invented GenAI?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is genai?"
+    },
+    {
+        "type": "ai",
+        "content": "Answer:\nGenerative AI (GenAI) is a branch of artificial intelligence that can generate new content such as text, images, audio, and code.\n\nSource:\ncontext"
+    },
+    {
+        "type": "human",
+        "content": "what is transformer"
+    },
+    {
+        "type": "ai",
+        "content": "Answer:\nTransformers are neural network architectures designed to process sequences using attention mechanisms.\n\nSource:\ncontext"
+    },
+    {
+        "type": "human",
+        "content": "what is aws"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what are contents"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What is data engineering?"
+    },
+    {
+        "type": "ai",
+        "content": "Data engineering involves designing end‑to‑end serverless data pipelines on AWS, automating ETL workflows with services such as AWS Lambda and AWS Glue, and using efficient storage formats like Parquet for analytics."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS is a cloud platform that provides services such as Amazon S3, AWS Lambda, Amazon SNS, EventBridge, and AWS Glue for building serverless data pipelines."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS is a cloud platform that provides services such as Amazon S3, AWS Lambda, Amazon SNS, EventBridge, and AWS Glue for building serverless data pipelines."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS is a cloud platform that provides services such as Amazon S3, AWS Lambda, Amazon SNS, EventBridge, and AWS Glue for building serverless data pipelines."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS is a cloud platform that provides services such as Amazon S3, AWS Lambda, Amazon SNS, EventBridge, and AWS Glue for building serverless data pipelines."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS is a cloud platform that provides fully managed services used in the serverless sales data pipeline, such as Amazon S3, AWS Lambda, Amazon SNS, EventBridge, and AWS Glue."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS is a cloud platform that provides fully managed services used in the serverless sales data pipeline, such as Amazon S3, AWS Lambda, Amazon SNS, EventBridge, and AWS Glue."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What programming language is AWS Lambda written in?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What does AWS Lambda do?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS Lambda validates the uploaded CSV file, copies it to the Raw Bucket, and then triggers the Glue Cleaning Job."
+    },
+    {
+        "type": "human",
+        "content": "What happens when a CSV file is uploaded?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What does AWS Lambda do?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS Lambda validates uploaded files, copies them to the Raw Bucket, and triggers the Glue Cleaning Job."
+    },
+    {
+        "type": "human",
+        "content": "What is AWS?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What programming language is AWS Lambda written in?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What is Amazon S3?"
+    },
+    {
+        "type": "ai",
+        "content": "Amazon S3 stores the Landing, Raw, Processed, and Curated datasets."
+    },
+    {
+        "type": "human",
+        "content": "Why is Lambda used in this pipeline?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What AWS services are used in this pipeline and what does each one do?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What AWS services are mentioned in the AWS Services Used section?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "what is aws?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What does AWS Lambda do?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS Lambda validates uploaded files, copies them to the Raw Bucket, and triggers the Glue Cleaning Job."
+    },
+    {
+        "type": "human",
+        "content": "What happens when a CSV file is uploaded?"
+    },
+    {
+        "type": "ai",
+        "content": "When a CSV file is uploaded to the Landing S3 bucket, Amazon S3 triggers an AWS Lambda function. The Lambda function validates the uploaded CSV file and copies it to the Raw bucket."
+    },
+    {
+        "type": "human",
+        "content": "What does AWS Lambda do?"
+    },
+    {
+        "type": "ai",
+        "content": "AWS Lambda validates uploaded files, copies them to the Raw Bucket, and triggers the Glue Cleaning Job."
+    },
+    {
+        "type": "human",
+        "content": "What AWS services are used in this pipeline and what does each one do?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "What AWS services are used in this pipeline and what does each one do?"
+    },
+    {
+        "type": "ai",
+        "content": "**AWS services used in the pipeline**\n\n| Service | What it does (as described in the documents) |\n|---------|----------------------------------------------|\n| **Amazon S3** | Stores the Landing, Raw, Processed, and Curated datasets and triggers the Lambda function when a CSV file is uploaded. |\n| **AWS Lambda** | Validates the uploaded CSV file, copies it to the Raw bucket, and triggers the AWS Glue ETL job. |\n| **AWS Glue** | Runs an ETL job that cleans and processes the data into Parquet format and then runs a transformation job that calculates business metrics such as Total Sales, Discount Amount, Final Sales, Order Year, and Order Month. |"
+    },
+    {
+        "type": "human",
+        "content": "What dataset was used in this project?"
+    },
+    {
+        "type": "ai",
+        "content": "The MNIST dataset."
+    },
+    {
+        "type": "human",
+        "content": "Why were the pixel values divided by 255?"
+    },
+    {
+        "type": "ai",
+        "content": "They were divided by 255 to improve convergence and training stability."
+    },
+    {
+        "type": "human",
+        "content": "What is the architecture of the ANN?"
+    },
+    {
+        "type": "ai",
+        "content": "The ANN is a sequential model consisting of:\n\n1. **Flatten** layer  \n2. **Dense** layer with 128 units and ReLU activation  \n3. **Dense** output layer with 10 units and Softmax activation"
+    },
+    {
+        "type": "human",
+        "content": "What optimizer, loss function, and metric were used to compile the model?"
+    },
+    {
+        "type": "ai",
+        "content": "Adam optimizer, sparse categorical crossentropy loss, and accuracy metric."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "I don't know based on the provided documents."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "It was trained by calling `model.fit` with `epochs=10`, `batch_size=32`, and `validation_split=0.2`."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "It was trained by calling `model.fit` with `epochs=10`, `batch_size=32`, and `validation_split=0.2`."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "It was trained by calling `model.fit` with `epochs=10`, `batch_size=32`, and `validation_split=0.2`."
+    }
+]

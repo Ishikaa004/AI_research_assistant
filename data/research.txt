@@ -1,0 +1,16 @@
+Generative AI is a branch of artificial intelligence that can generate
+new content such as text, images, audio, and code.
+
+Large Language Models are neural networks trained on large amounts of
+text data. They can understand and generate human-like language.
+
+Retrieval-Augmented Generation, or RAG, combines information retrieval
+with language generation. Instead of relying only on knowledge learned
+during model training, a RAG system retrieves relevant information from
+external documents and provides that information to the language model.
+
+Embeddings are numerical representations of text. They allow a system
+to compare the semantic meaning of different pieces of text.
+
+A vector database stores these numerical representations and allows
+efficient similarity search.

@@ -1,0 +1,1 @@
+Transformers are neural network architectures designed to process sequences using attention mechanisms. They became important in natural language processing because they can efficiently model relationships between words and tokens.
