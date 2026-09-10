@@ -1,4 +1,3 @@
-
 import os
 
 from dotenv import load_dotenv
@@ -98,9 +97,11 @@ def initialize_pipeline(document_paths):
             continue
 
         if not os.path.exists(file_path):
+
             print(
                 f"Warning: File not found: {file_path}"
             )
+
             continue
 
         filename = os.path.basename(file_path)
@@ -122,6 +123,7 @@ def initialize_pipeline(document_paths):
     # --------------------------------------------------------
 
     if not documents:
+
         raise ValueError(
             "No readable documents were loaded."
         )
@@ -197,13 +199,7 @@ def check_evidence(
     Determine whether the retrieved context contains
     enough information to answer the question.
 
-    IMPORTANT:
-
     This check happens BEFORE answer generation.
-
-    Therefore, if the document does not contain enough
-    information, the LLM never gets the opportunity
-    to generate an unsupported answer.
     """
 
     evidence_prompt = f"""
@@ -302,12 +298,15 @@ QUESTION:
         # "UNSUPPORTED" contains "SUPPORTED".
 
         if "UNSUPPORTED" in decision:
+
             return False
 
         if decision == "SUPPORTED":
+
             return True
 
         # Fail closed if unexpected response.
+
         return False
 
     except Exception as e:
@@ -317,6 +316,7 @@ QUESTION:
         )
 
         # Fail closed.
+
         return False
 
 
@@ -335,9 +335,20 @@ def run_rag(
     Run the complete RAG pipeline.
 
     Returns:
-        answer
-        compressed supporting documents
-        final context
+
+        answer:
+            Final generated answer.
+
+        retrieved_documents:
+            Top reranked retrieval results BEFORE
+            contextual compression.
+
+            These documents are used for retrieval
+            evaluation such as Hit@K, Recall@K and MRR.
+
+        context:
+            Final compressed context used by the
+            evidence checker and answer generator.
     """
 
     # --------------------------------------------------------
@@ -482,10 +493,13 @@ def run_rag(
             "=============================="
         )
 
-        for i, query in enumerate(queries):
+        for i, query in enumerate(
+            queries,
+            start=1
+        ):
 
             print(
-                f"Query {i + 1}: {query}"
+                f"Query {i}: {query}"
             )
 
     # --------------------------------------------------------
@@ -543,7 +557,9 @@ def run_rag(
 
     for query in queries:
 
-        # Use filtered chunks when a source filter is active.
+        # Use filtered chunks when a source filter
+        # is active.
+
         search_chunks = filtered_chunks
 
         bm25_results = bm25_search(
@@ -643,21 +659,36 @@ def run_rag(
         results
     )
 
-    # Keep the best 8 chunks for compression.
+    # --------------------------------------------------------
+    # RETRIEVAL EVALUATION SET
+    # --------------------------------------------------------
+
+    # Keep top 8 after reranking.
+
     results = results[:8]
+
+    # IMPORTANT:
+    #
+    # These are the actual retrieval results that
+    # should be evaluated.
+    #
+    # We make a separate copy so later compression
+    # does not modify the evaluation set.
+
+    retrieved_documents = results.copy()
 
     if verbose:
 
         print(
             f"After reranking: "
-            f"{len(results)} chunks."
+            f"{len(retrieved_documents)} chunks."
         )
 
     # --------------------------------------------------------
-    # NO SUPPORTING CONTEXT
+    # NO RETRIEVAL RESULTS
     # --------------------------------------------------------
 
-    if not results:
+    if not retrieved_documents:
 
         answer = (
             "I don't know based on the provided documents."
@@ -697,7 +728,10 @@ def run_rag(
             "=============================="
         )
 
-        for i, document in enumerate(results):
+        for i, document in enumerate(
+            retrieved_documents,
+            start=1
+        ):
 
             source = document.metadata.get(
                 "source",
@@ -710,7 +744,7 @@ def run_rag(
             )
 
             print(
-                f"\n--- Chunk {i + 1} ---"
+                f"\n--- Chunk {i} ---"
             )
 
             print(
@@ -738,7 +772,7 @@ def run_rag(
     compressed_results = compress_documents(
         llm,
         question,
-        results
+        retrieved_documents
     )
 
     if verbose:
@@ -767,7 +801,8 @@ def run_rag(
         )
 
         for i, document in enumerate(
-            compressed_results
+            compressed_results,
+            start=1
         ):
 
             source = document.metadata.get(
@@ -781,7 +816,7 @@ def run_rag(
             )
 
             print(
-                f"\n--- Compressed Chunk {i + 1} ---"
+                f"\n--- Compressed Chunk {i} ---"
             )
 
             print(
@@ -838,14 +873,20 @@ def run_rag(
                 answer
             )
 
+        # IMPORTANT:
+        #
+        # Retrieval evaluation should still receive
+        # retrieved_documents even if compression
+        # failed.
+
         return (
             answer,
-            [],
+            retrieved_documents,
             ""
         )
 
     # --------------------------------------------------------
-    # CREATE CONTEXT WITH SOURCE INFORMATION
+    # CREATE FINAL CONTEXT
     # --------------------------------------------------------
 
     context_parts = []
@@ -940,7 +981,7 @@ def run_rag(
         )
 
     # --------------------------------------------------------
-    # REJECT BEFORE GENERATION
+    # REJECT UNSUPPORTED ANSWER
     # --------------------------------------------------------
 
     if not is_supported:
@@ -976,12 +1017,16 @@ def run_rag(
             )
 
         # IMPORTANT:
-        # Return compressed_results because these are the
-        # actual supporting/retrieved evidence chunks.
+        #
+        # Return retrieved_documents, not
+        # compressed_results.
+        #
+        # Retrieval evaluation should evaluate
+        # retrieval independently from generation.
 
         return (
             answer,
-            compressed_results,
+            retrieved_documents,
             context
         )
 
@@ -1048,17 +1093,12 @@ def run_rag(
         )
 
     # --------------------------------------------------------
-    # RETURN
+    # FINAL RETURN
     # --------------------------------------------------------
-
-    # IMPORTANT:
-    # Return compressed_results rather than the original
-    # reranked results. These are the actual evidence chunks
-    # used to construct the final context.
 
     return (
         answer,
-        compressed_results,
+        retrieved_documents,
         context
     )
 
@@ -1221,11 +1261,8 @@ def chat():
             "=============================="
         )
 
-        # The context contains the exact compressed evidence
-        # used by the evidence checker and answer generator.
-        #
-        # Therefore source/page information is extracted
-        # directly from the final context.
+        # The final context contains the exact
+        # compressed evidence used for the answer.
 
         if context:
 
@@ -1234,6 +1271,7 @@ def chat():
             for line in context.splitlines():
 
                 if not line.startswith("Source:"):
+
                     continue
 
                 source_line = line.replace(
@@ -1264,7 +1302,8 @@ def chat():
                         )
 
                         print(
-                            f"- {source_name} - Page {page}"
+                            f"- {source_name} "
+                            f"- Page {page}"
                         )
 
                 else:

@@ -494,5 +494,13 @@
     {
         "type": "ai",
         "content": "It was trained by calling `model.fit` with `epochs=10`, `batch_size=32`, and `validation_split=0.2`."
+    },
+    {
+        "type": "human",
+        "content": "How was the ANN trained?"
+    },
+    {
+        "type": "ai",
+        "content": "It was trained by calling `model.fit` with `epochs=10`, `batch_size=32`, and `validation_split=0.2`."
     }
 ]
