@@ -1,10 +1,14 @@
 import os
 import re
-
+from app.evidence_selector import find_best_evidence
 from app.main import (
     initialize_pipeline,
     run_rag,
     llm
+)
+
+from app.nli_faithfulness import (
+    check_nli_support
 )
 
 
@@ -44,18 +48,10 @@ def get_relevant_ranks(
             None
         )
 
-        # ----------------------------------------------------
-        # SOURCE MATCH
-        # ----------------------------------------------------
-
         source_matches = (
             expected_source.lower()
             in os.path.basename(source).lower()
         )
-
-        # ----------------------------------------------------
-        # PAGE MATCH
-        # ----------------------------------------------------
 
         if expected_page is not None:
 
@@ -66,10 +62,6 @@ def get_relevant_ranks(
         else:
 
             page_matches = True
-
-        # ----------------------------------------------------
-        # RELEVANT DOCUMENT
-        # ----------------------------------------------------
 
         if source_matches and page_matches:
 
@@ -93,10 +85,8 @@ def evaluate_hit_at_k(
     """
     Hit@K
 
-    Returns:
-
-    1 -> at least one relevant result is
-         present in top K.
+    1 -> at least one relevant result
+         is present in top K.
 
     0 -> no relevant result is present
          in top K.
@@ -111,7 +101,6 @@ def evaluate_hit_at_k(
     for rank in relevant_ranks:
 
         if rank <= k:
-
             return 1.0
 
     return 0.0
@@ -132,22 +121,14 @@ def evaluate_recall_at_k(
 
     Each test case has one expected relevant page.
 
-    Therefore:
+    Recall@K = 1 if the expected page appears
+    in top K.
 
-        Recall@K = 1
-        if the expected page appears in top K.
-
-        Recall@K = 0
-        otherwise.
+    Recall@K = 0 otherwise.
     """
 
     if not expected_source:
-
         return 0.0
-
-    # --------------------------------------------------------
-    # CHECK ONLY TOP K
-    # --------------------------------------------------------
 
     for document in retrieved_documents[:k]:
 
@@ -161,18 +142,10 @@ def evaluate_recall_at_k(
             None
         )
 
-        # ----------------------------------------------------
-        # SOURCE MATCH
-        # ----------------------------------------------------
-
         source_matches = (
             expected_source.lower()
             in os.path.basename(source).lower()
         )
-
-        # ----------------------------------------------------
-        # PAGE MATCH
-        # ----------------------------------------------------
 
         if expected_page is not None:
 
@@ -184,12 +157,7 @@ def evaluate_recall_at_k(
 
             page_matches = True
 
-        # ----------------------------------------------------
-        # RELEVANT RESULT FOUND
-        # ----------------------------------------------------
-
         if source_matches and page_matches:
-
             return 1.0
 
     return 0.0
@@ -208,15 +176,11 @@ def evaluate_mrr_at_k(
     """
     Mean Reciprocal Rank.
 
-    For one query:
-
-        MRR = 1 / rank
+    MRR = 1 / rank
 
     if the relevant result is found.
 
-    Otherwise:
-
-        MRR = 0
+    Otherwise MRR = 0.
     """
 
     relevant_ranks = get_relevant_ranks(
@@ -225,14 +189,9 @@ def evaluate_mrr_at_k(
         expected_page
     )
 
-    # --------------------------------------------------------
-    # FIND FIRST RELEVANT RESULT
-    # --------------------------------------------------------
-
     for rank in relevant_ranks:
 
         if rank <= k:
-
             return 1.0 / rank
 
     return 0.0
@@ -252,15 +211,12 @@ def evaluate_retrieval(
 
     Returns:
 
-    1 -> expected source/page retrieved
-
-    0 -> expected source/page not retrieved
-
-    None -> no expected source.
+    1.0 -> expected source/page retrieved
+    0.0 -> expected source/page not retrieved
+    None -> no expected source
     """
 
     if not expected_source:
-
         return None
 
     relevant_ranks = get_relevant_ranks(
@@ -270,7 +226,6 @@ def evaluate_retrieval(
     )
 
     if relevant_ranks:
-
         return 1.0
 
     return 0.0
@@ -301,15 +256,14 @@ def evaluate_answer(
     """
 
     if expected_answer is None:
-
         return None
 
     if not answer:
-
         return 0.0
 
     prompt = f"""
-You are an evaluator for a Retrieval-Augmented Generation (RAG) system.
+You are an evaluator for a Retrieval-Augmented Generation
+(RAG) system.
 
 Your task is to evaluate the CORRECTNESS of the generated answer.
 
@@ -393,10 +347,6 @@ Score:
 
         text = response.content.strip()
 
-        # ----------------------------------------------------
-        # EXTRACT SCORE
-        # ----------------------------------------------------
-
         match = re.search(
             r"\b(?:0(?:\.\d+)?|1(?:\.0+)?)\b",
             text
@@ -414,10 +364,6 @@ Score:
         score = float(
             match.group()
         )
-
-        # ----------------------------------------------------
-        # KEEP SCORE BETWEEN 0 AND 1
-        # ----------------------------------------------------
 
         score = max(
             0.0,
@@ -439,7 +385,7 @@ Score:
 
 
 # ============================================================
-# 7. CLAIM-LEVEL FAITHFULNESS EVALUATION
+# 7. CLAIM-LEVEL FAITHFULNESS
 # ============================================================
 
 def extract_claims(
@@ -450,11 +396,16 @@ def extract_claims(
     Break the generated answer into individual
     factual claims.
 
-    Returns a list of claims.
+    Returns:
+
+        list -> claims extracted successfully
+
+        []   -> no factual claims
+
+        None -> evaluator failed
     """
 
     if not answer:
-
         return []
 
     prompt = f"""
@@ -464,12 +415,40 @@ Extract every factual claim from the generated answer.
 
 Rules:
 
-1. Each claim must be a standalone factual statement.
-2. Do not add new information.
-3. Do not change the meaning.
-4. Ignore greetings, opinions, and filler text.
-5. Return one claim per line.
-6. If there are no factual claims, return:
+1. Each claim must represent a factual statement or factual fact.
+2. Short factual answers and factual phrases MUST be treated
+   as claims.
+3. Do not add new information.
+4. Do not change the meaning.
+5. Ignore greetings and filler text.
+6. Return one claim per line.
+7. If there are no factual claims, return:
+NO_CLAIMS
+
+Examples:
+
+Generated answer:
+Adam optimizer.
+
+Output:
+Adam optimizer.
+
+Generated answer:
+60000 training images.
+
+Output:
+There are 60000 training images.
+
+Generated answer:
+The MNIST dataset.
+
+Output:
+The MNIST dataset.
+
+Generated answer:
+Hello, how can I help?
+
+Output:
 NO_CLAIMS
 
 Generated answer:
@@ -486,6 +465,24 @@ Generated answer:
 
         if text == "NO_CLAIMS":
 
+            # ------------------------------------------------
+            # SHORT-ANSWER FALLBACK
+            # ------------------------------------------------
+            #
+            # A short factual answer such as:
+            #
+            # "sparse categorical crossentropy loss."
+            #
+            # must still be evaluated as a claim.
+            #
+            cleaned_answer = answer.strip()
+
+            if cleaned_answer:
+
+                return [
+                    cleaned_answer
+                ]
+
             return []
 
         claims = []
@@ -495,12 +492,7 @@ Generated answer:
             line = line.strip()
 
             if not line:
-
                 continue
-
-            # Remove numbering such as:
-            # 1. claim
-            # 2) claim
 
             line = re.sub(
                 r"^\s*\d+[\.\)]\s*",
@@ -509,10 +501,23 @@ Generated answer:
             )
 
             if line:
-
                 claims.append(
                     line
                 )
+
+        # ----------------------------------------------------
+        # SHORT-ANSWER FALLBACK
+        # ----------------------------------------------------
+
+        if not claims:
+
+            cleaned_answer = answer.strip()
+
+            if cleaned_answer:
+
+                return [
+                    cleaned_answer
+                ]
 
         return claims
 
@@ -522,8 +527,12 @@ Generated answer:
             f"Claim extraction error: {e}"
         )
 
-        return []
+        return None
 
+
+# ============================================================
+# CLAIM SUPPORT CHECK
+# ============================================================
 
 def check_claim_support(
     claim,
@@ -537,7 +546,10 @@ def check_claim_support(
     Returns:
 
         True  -> supported
+
         False -> unsupported
+
+        None  -> evaluation failed
     """
 
     prompt = f"""
@@ -562,8 +574,11 @@ Rules:
 6. If the context does not provide enough information,
    return UNSUPPORTED.
 7. Return ONLY one word:
+
 SUPPORTED
+
 or
+
 UNSUPPORTED
 """
 
@@ -573,18 +588,16 @@ UNSUPPORTED
             prompt
         )
 
-        result = response.content.strip().upper()
-
-        # IMPORTANT:
-        # Check UNSUPPORTED first because
-        # "UNSUPPORTED" contains "SUPPORTED".
+        result = (
+            response.content
+            .strip()
+            .upper()
+        )
 
         if "UNSUPPORTED" in result:
-
             return False
 
         if "SUPPORTED" in result:
-
             return True
 
         print(
@@ -592,7 +605,7 @@ UNSUPPORTED
             "an invalid result."
         )
 
-        return False
+        return None
 
     except Exception as e:
 
@@ -600,8 +613,12 @@ UNSUPPORTED
             f"Claim support evaluation error: {e}"
         )
 
-        return False
+        return None
 
+
+# ============================================================
+# LLM-BASED FAITHFULNESS
+# ============================================================
 
 def evaluate_faithfulness(
     answer,
@@ -612,38 +629,47 @@ def evaluate_faithfulness(
     Evaluate faithfulness at claim level.
 
     Faithfulness =
-        supported claims / total factual claims
+        supported claims / evaluated claims
 
     Returns:
-        0.0 to 1.0
+
+        0.0 to 1.0 -> successful evaluation
+
+        None -> evaluation failed
     """
 
     if not answer or not context:
-
         return 0.0
-
-    # --------------------------------------------------------
-    # EXTRACT CLAIMS
-    # --------------------------------------------------------
 
     claims = extract_claims(
         answer,
         llm
     )
 
+    if claims is None:
+
+        print(
+            "Faithfulness evaluation: N/A "
+            "(claim extraction failed)"
+        )
+
+        return None
+
     if not claims:
 
+        print(
+            "Faithfulness evaluation: 0.0 "
+            "(no factual claims)"
+        )
+
         return 0.0
-
-    supported_claims = 0
-
-    # --------------------------------------------------------
-    # CHECK EACH CLAIM
-    # --------------------------------------------------------
 
     print(
         f"\nClaims extracted: {len(claims)}"
     )
+
+    supported_claims = 0
+    evaluated_claims = 0
 
     for index, claim in enumerate(
         claims,
@@ -656,43 +682,218 @@ def evaluate_faithfulness(
             llm
         )
 
-        if supported:
+        if supported is True:
 
             supported_claims += 1
+            evaluated_claims += 1
 
             print(
                 f"Claim {index}: SUPPORTED"
             )
 
-        else:
+        elif supported is False:
+
+            evaluated_claims += 1
 
             print(
                 f"Claim {index}: UNSUPPORTED"
+            )
+
+        else:
+
+            print(
+                f"Claim {index}: N/A "
+                "(evaluation failed)"
             )
 
         print(
             f"  {claim}"
         )
 
-    # --------------------------------------------------------
-    # CALCULATE SCORE
-    # --------------------------------------------------------
+    if evaluated_claims == 0:
+
+        print(
+            "Faithfulness evaluation: N/A "
+            "(no claims could be evaluated)"
+        )
+
+        return None
 
     score = (
         supported_claims
-        / len(claims)
+        / evaluated_claims
     )
 
     print(
         f"Supported claims: "
-        f"{supported_claims}/{len(claims)}"
+        f"{supported_claims}/{evaluated_claims}"
     )
 
     return score
 
 
 # ============================================================
-# 8. UNSUPPORTED QUESTION EVALUATION
+# 8. NLI-BASED FAITHFULNESS
+# ============================================================
+
+def evaluate_nli_faithfulness(
+    answer,
+    context,
+    retrieved_documents,
+    llm
+):
+    """
+    Evaluate faithfulness using NLI.
+
+    Each factual claim is first matched with
+    its most relevant retrieved document chunk.
+
+    Then NLI checks the claim against that
+    specific evidence.
+    """
+
+    if not answer or not context:
+        return 0.0
+
+    claims = extract_claims(
+        answer,
+        llm
+    )
+
+    if claims is None:
+
+        print(
+            "NLI faithfulness: N/A "
+            "(claim extraction failed)"
+        )
+
+        return None
+
+    if not claims:
+
+        print(
+            "NLI faithfulness: 0.0 "
+            "(no factual claims)"
+        )
+
+        return 0.0
+
+    print(
+        f"\nNLI claims: {len(claims)}"
+    )
+
+    supported_claims = 0
+    evaluated_claims = 0
+
+    for index, claim in enumerate(
+        claims,
+        start=1
+    ):
+
+        print(
+            f"\nNLI Claim {index}:"
+        )
+
+        print(
+            f"  {claim}"
+        )
+
+        try:
+
+            # --------------------------------
+            # Find best evidence
+            # --------------------------------
+
+            evidence_document = find_best_evidence(
+                claim,
+                retrieved_documents
+            )
+
+            if evidence_document is None:
+
+                print(
+                    "  No relevant evidence found."
+                )
+
+                continue
+
+            evidence = (
+                evidence_document.page_content
+            )
+
+            print(
+                "  Evidence:"
+            )
+
+            print(
+                f"  {evidence}"
+            )
+
+            # --------------------------------
+            # NLI
+            # --------------------------------
+
+            result = check_nli_support(
+                claim,
+                evidence
+            )
+
+            print(
+                f"  NLI Result: {result}"
+            )
+
+            if result == "ENTAILMENT":
+
+                supported_claims += 1
+                evaluated_claims += 1
+
+            elif result in [
+                "CONTRADICTION",
+                "NEUTRAL"
+            ]:
+
+                evaluated_claims += 1
+
+            else:
+
+                print(
+                    "  Invalid NLI result."
+                )
+
+        except Exception as e:
+
+            print(
+                f"NLI evaluation error: {e}"
+            )
+
+    if evaluated_claims == 0:
+
+        print(
+            "NLI faithfulness: N/A "
+            "(no claims evaluated)"
+        )
+
+        return None
+
+    score = (
+        supported_claims
+        / evaluated_claims
+    )
+
+    print(
+        f"\nNLI supported claims: "
+        f"{supported_claims}/{evaluated_claims}"
+    )
+
+    print(
+        f"NLI faithfulness: {score:.2f}"
+    )
+
+    return score
+
+
+# ============================================================
+# 9. UNSUPPORTED QUESTION EVALUATION
 # ============================================================
 
 def evaluate_unsupported_answer(
@@ -713,31 +914,21 @@ def evaluate_unsupported_answer(
         in answer.lower()
     )
 
-    # --------------------------------------------------------
-    # EXPECTED UNSUPPORTED
-    # --------------------------------------------------------
-
     if expected_unsupported:
 
         if actual_unsupported:
-
             return 1.0
 
         return 0.0
 
-    # --------------------------------------------------------
-    # EXPECTED SUPPORTED
-    # --------------------------------------------------------
-
     if not actual_unsupported:
-
         return 1.0
 
     return 0.0
 
 
 # ============================================================
-# 9. RUN EVALUATION
+# 10. RUN EVALUATION
 # ============================================================
 
 def run_evaluation(
@@ -757,9 +948,12 @@ def run_evaluation(
 
     Generation:
         - Answer correctness
-        - Claim-level faithfulness
 
-    Safety / robustness:
+    Faithfulness:
+        - Claim-level LLM faithfulness
+        - NLI-based faithfulness
+
+    Safety:
         - Unsupported handling
     """
 
@@ -811,6 +1005,8 @@ def run_evaluation(
 
     faithfulness_scores = []
 
+    nli_faithfulness_scores = []
+
     unsupported_scores = []
 
     # ========================================================
@@ -822,7 +1018,9 @@ def run_evaluation(
         start=1
     ):
 
-        question = test_case["question"]
+        question = test_case[
+            "question"
+        ]
 
         expected_source = test_case.get(
             "expected_source"
@@ -880,20 +1078,12 @@ def run_evaluation(
 
         if expected_source:
 
-            # ------------------------------------------------
-            # HIT@5
-            # ------------------------------------------------
-
             hit_at_5 = evaluate_hit_at_k(
                 retrieved_documents,
                 expected_source,
                 expected_page,
                 k=5
             )
-
-            # ------------------------------------------------
-            # RECALL@5
-            # ------------------------------------------------
 
             recall_at_5 = evaluate_recall_at_k(
                 retrieved_documents,
@@ -902,10 +1092,6 @@ def run_evaluation(
                 k=5
             )
 
-            # ------------------------------------------------
-            # MRR@5
-            # ------------------------------------------------
-
             mrr_at_5 = evaluate_mrr_at_k(
                 retrieved_documents,
                 expected_source,
@@ -913,19 +1099,11 @@ def run_evaluation(
                 k=5
             )
 
-            # ------------------------------------------------
-            # BASIC RETRIEVAL
-            # ------------------------------------------------
-
             retrieval_score = evaluate_retrieval(
                 retrieved_documents,
                 expected_source,
                 expected_page
             )
-
-            # ------------------------------------------------
-            # SAVE
-            # ------------------------------------------------
 
             hit_scores.append(
                 hit_at_5
@@ -942,10 +1120,6 @@ def run_evaluation(
             retrieval_scores.append(
                 retrieval_score
             )
-
-            # ------------------------------------------------
-            # PRINT
-            # ------------------------------------------------
 
             print(
                 "\nHit@5:",
@@ -1042,7 +1216,7 @@ def run_evaluation(
             )
 
         # ====================================================
-        # CLAIM-LEVEL FAITHFULNESS
+        # CLAIM-LEVEL LLM FAITHFULNESS
         # ====================================================
 
         if expected_unsupported:
@@ -1062,17 +1236,68 @@ def run_evaluation(
                 )
             )
 
-            faithfulness_scores.append(
-                faithfulness_score
-            )
+            if faithfulness_score is not None:
+
+                faithfulness_scores.append(
+                    faithfulness_score
+                )
+
+                print(
+                    "Faithfulness score:",
+                    round(
+                        faithfulness_score,
+                        2
+                    )
+                )
+
+            else:
+
+                print(
+                    "Faithfulness score: N/A "
+                    "(evaluation failed)"
+                )
+
+        # ====================================================
+        # NLI-BASED FAITHFULNESS
+        # ====================================================
+
+        if expected_unsupported:
 
             print(
-                "Faithfulness score:",
-                round(
-                    faithfulness_score,
-                    2
+                "NLI Faithfulness: N/A "
+                "(unsupported question)"
+            )
+
+        else:
+
+            nli_faithfulness_score = (
+                evaluate_nli_faithfulness(
+                    answer,
+                    context,
+                    llm
                 )
             )
+
+            if nli_faithfulness_score is not None:
+
+                nli_faithfulness_scores.append(
+                    nli_faithfulness_score
+                )
+
+                print(
+                    "NLI Faithfulness score:",
+                    round(
+                        nli_faithfulness_score,
+                        2
+                    )
+                )
+
+            else:
+
+                print(
+                    "NLI Faithfulness: N/A "
+                    "(evaluation failed)"
+                )
 
         # ====================================================
         # RETRIEVED SOURCES
@@ -1106,7 +1331,6 @@ def run_evaluation(
             )
 
             if source_key in seen_sources:
-
                 continue
 
             seen_sources.add(
@@ -1281,13 +1505,44 @@ def run_evaluation(
             )
         )
 
+    else:
+
+        print(
+            "Claim-level faithfulness average: N/A"
+        )
+
+    # ========================================================
+    # NLI FAITHFULNESS
+    # ========================================================
+
+    if nli_faithfulness_scores:
+
+        nli_faithfulness_average = (
+            sum(nli_faithfulness_scores)
+            / len(nli_faithfulness_scores)
+        )
+
+        print(
+            "NLI faithfulness average:",
+            round(
+                nli_faithfulness_average,
+                2
+            )
+        )
+
+    else:
+
+        print(
+            "NLI faithfulness average: N/A"
+        )
+
     print(
         "\nEvaluation completed."
     )
 
 
 # ============================================================
-# 10. TEST DATASET
+# 11. TEST DATASET
 # ============================================================
 
 if __name__ == "__main__":
@@ -1509,3 +1764,4 @@ if __name__ == "__main__":
         test_cases,
         document_path
     )
+
