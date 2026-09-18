@@ -23,8 +23,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-if "GROQ_API_KEY" in st.secrets:
-    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
+groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
 # ============================================================
 # 1. ENVIRONMENT
 # ============================================================
@@ -60,7 +59,8 @@ print("Embedding model loaded!")
 
 llm = ChatGroq(
     model="openai/gpt-oss-20b",
-    temperature=0
+    temperature=0,
+    api_key=groq_api_key
 )
 
 print("LLM created!")
