@@ -10,3 +10,4 @@ transformers
 torch
 pymupdf
 python-dotenv
+langchain-huggingface
