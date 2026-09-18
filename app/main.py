@@ -17,7 +17,14 @@ from app.rrf import reciprocal_rank_fusion
 from app.metadata_filter import filter_documents
 from app.memory import ConversationMemory
 
+import os
+import streamlit as st
+from dotenv import load_dotenv
 
+load_dotenv()
+
+if "GROQ_API_KEY" in st.secrets:
+    os.environ["GROQ_API_KEY"] = st.secrets["GROQ_API_KEY"]
 # ============================================================
 # 1. ENVIRONMENT
 # ============================================================
