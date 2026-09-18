@@ -1,6 +1,8 @@
 import os
 import re
+
 from app.evidence_selector import find_best_evidence
+
 from app.main import (
     initialize_pipeline,
     run_rag,
@@ -37,7 +39,6 @@ def get_relevant_ranks(
         retrieved_documents,
         start=1
     ):
-
         source = document.metadata.get(
             "source",
             ""
@@ -54,17 +55,13 @@ def get_relevant_ranks(
         )
 
         if expected_page is not None:
-
             page_matches = (
                 page == expected_page
             )
-
         else:
-
             page_matches = True
 
         if source_matches and page_matches:
-
             relevant_ranks.append(
                 rank
             )
@@ -148,13 +145,10 @@ def evaluate_recall_at_k(
         )
 
         if expected_page is not None:
-
             page_matches = (
                 page == expected_page
             )
-
         else:
-
             page_matches = True
 
         if source_matches and page_matches:
@@ -177,7 +171,6 @@ def evaluate_mrr_at_k(
     Mean Reciprocal Rank.
 
     MRR = 1 / rank
-
     if the relevant result is found.
 
     Otherwise MRR = 0.
@@ -270,12 +263,15 @@ Your task is to evaluate the CORRECTNESS of the generated answer.
 You are given:
 
 Question:
+
 {question}
 
 Ground truth answer:
+
 {expected_answer}
 
 Generated answer:
+
 {answer}
 
 Evaluate ONLY whether the generated answer correctly answers
@@ -284,27 +280,41 @@ the question compared with the ground truth.
 IMPORTANT RULES:
 
 1. Judge the meaning, not exact wording.
+
 2. Accept valid paraphrases.
+
 3. Do not penalize different sentence structure.
+
 4. Do not require the generated answer to use the exact
    words from the ground truth.
+
 5. If the generated answer contains the correct main fact,
    consider it correct even if wording differs.
+
 6. If important information is missing, reduce the score.
+
 7. If the answer contains a factual contradiction,
    reduce the score significantly.
+
 8. If the generated answer contains unsupported extra claims
    that make the answer incorrect, reduce the score.
+
 9. Do NOT use your general knowledge to add facts.
+
 10. Judge only the information provided above.
 
 Scoring:
 
 1.0 = completely correct
+
 0.8 = mostly correct with a minor omission
+
 0.6 = partially correct
+
 0.4 = substantially incomplete or partly incorrect
+
 0.2 = mostly incorrect
+
 0.0 = completely incorrect or does not answer the question
 
 Return ONLY the numeric score.
@@ -312,30 +322,39 @@ Return ONLY the numeric score.
 Examples:
 
 Ground truth:
+
 The Adam optimizer was used.
 
 Generated:
+
 The model was compiled using Adam.
 
 Score:
+
 1.0
 
 Ground truth:
+
 There are 60,000 training images.
 
 Generated:
+
 The training set contains 60,000 images.
 
 Score:
+
 1.0
 
 Ground truth:
+
 The model was saved as mnist_ann_model.keras.
 
 Generated:
+
 The model was saved as model.keras.
 
 Score:
+
 0.0
 """
 
@@ -399,9 +418,7 @@ def extract_claims(
     Returns:
 
         list -> claims extracted successfully
-
         []   -> no factual claims
-
         None -> evaluator failed
     """
 
@@ -416,42 +433,58 @@ Extract every factual claim from the generated answer.
 Rules:
 
 1. Each claim must represent a factual statement or factual fact.
+
 2. Short factual answers and factual phrases MUST be treated
    as claims.
+
 3. Do not add new information.
+
 4. Do not change the meaning.
+
 5. Ignore greetings and filler text.
+
 6. Return one claim per line.
+
 7. If there are no factual claims, return:
+
 NO_CLAIMS
 
 Examples:
 
 Generated answer:
+
 Adam optimizer.
 
 Output:
+
 Adam optimizer.
 
 Generated answer:
+
 60000 training images.
 
 Output:
+
 There are 60000 training images.
 
 Generated answer:
+
 The MNIST dataset.
 
 Output:
+
 The MNIST dataset.
 
 Generated answer:
+
 Hello, how can I help?
 
 Output:
+
 NO_CLAIMS
 
 Generated answer:
+
 {answer}
 """
 
@@ -468,17 +501,10 @@ Generated answer:
             # ------------------------------------------------
             # SHORT-ANSWER FALLBACK
             # ------------------------------------------------
-            #
-            # A short factual answer such as:
-            #
-            # "sparse categorical crossentropy loss."
-            #
-            # must still be evaluated as a claim.
-            #
+
             cleaned_answer = answer.strip()
 
             if cleaned_answer:
-
                 return [
                     cleaned_answer
                 ]
@@ -494,13 +520,22 @@ Generated answer:
             if not line:
                 continue
 
+            # Remove numbered list formatting
             line = re.sub(
                 r"^\s*\d+[\.\)]\s*",
                 "",
                 line
             )
 
+            # Remove bullet formatting
+            line = re.sub(
+                r"^\s*[-*]\s*",
+                "",
+                line
+            )
+
             if line:
+
                 claims.append(
                     line
                 )
@@ -514,7 +549,6 @@ Generated answer:
             cleaned_answer = answer.strip()
 
             if cleaned_answer:
-
                 return [
                     cleaned_answer
                 ]
@@ -546,9 +580,7 @@ def check_claim_support(
     Returns:
 
         True  -> supported
-
         False -> unsupported
-
         None  -> evaluation failed
     """
 
@@ -559,20 +591,28 @@ Your task is to determine whether the CLAIM is directly
 supported by the CONTEXT.
 
 CONTEXT:
+
 {context}
 
 CLAIM:
+
 {claim}
 
 Rules:
 
 1. Use ONLY the provided context.
+
 2. Do NOT use outside knowledge.
+
 3. The context may support the claim using different wording.
+
 4. The claim must be directly supported by the context.
+
 5. If the context contradicts the claim, return UNSUPPORTED.
+
 6. If the context does not provide enough information,
    return UNSUPPORTED.
+
 7. Return ONLY one word:
 
 SUPPORTED
@@ -629,12 +669,12 @@ def evaluate_faithfulness(
     Evaluate faithfulness at claim level.
 
     Faithfulness =
+
         supported claims / evaluated claims
 
     Returns:
 
         0.0 to 1.0 -> successful evaluation
-
         None -> evaluation failed
     """
 
@@ -750,10 +790,19 @@ def evaluate_nli_faithfulness(
 
     Then NLI checks the claim against that
     specific evidence.
+
+    Returns:
+
+        0.0 to 1.0 -> successful evaluation
+        None -> evaluation failed
     """
 
     if not answer or not context:
         return 0.0
+
+    # --------------------------------------------------------
+    # Extract claims
+    # --------------------------------------------------------
 
     claims = extract_claims(
         answer,
@@ -785,6 +834,10 @@ def evaluate_nli_faithfulness(
     supported_claims = 0
     evaluated_claims = 0
 
+    # --------------------------------------------------------
+    # Evaluate each claim
+    # --------------------------------------------------------
+
     for index, claim in enumerate(
         claims,
         start=1
@@ -800,9 +853,9 @@ def evaluate_nli_faithfulness(
 
         try:
 
-            # --------------------------------
-            # Find best evidence
-            # --------------------------------
+            # ------------------------------------------------
+            # Find best evidence for this claim
+            # ------------------------------------------------
 
             evidence_document = find_best_evidence(
                 claim,
@@ -817,6 +870,10 @@ def evaluate_nli_faithfulness(
 
                 continue
 
+            # ------------------------------------------------
+            # Get evidence text
+            # ------------------------------------------------
+
             evidence = (
                 evidence_document.page_content
             )
@@ -829,9 +886,9 @@ def evaluate_nli_faithfulness(
                 f"  {evidence}"
             )
 
-            # --------------------------------
-            # NLI
-            # --------------------------------
+            # ------------------------------------------------
+            # NLI check
+            # ------------------------------------------------
 
             result = check_nli_support(
                 claim,
@@ -841,6 +898,10 @@ def evaluate_nli_faithfulness(
             print(
                 f"  NLI Result: {result}"
             )
+
+            # ------------------------------------------------
+            # Score
+            # ------------------------------------------------
 
             if result == "ENTAILMENT":
 
@@ -866,6 +927,10 @@ def evaluate_nli_faithfulness(
                 f"NLI evaluation error: {e}"
             )
 
+    # --------------------------------------------------------
+    # No claims evaluated
+    # --------------------------------------------------------
+
     if evaluated_claims == 0:
 
         print(
@@ -874,6 +939,10 @@ def evaluate_nli_faithfulness(
         )
 
         return None
+
+    # --------------------------------------------------------
+    # Calculate score
+    # --------------------------------------------------------
 
     score = (
         supported_claims
@@ -994,17 +1063,13 @@ def run_evaluation(
     # ========================================================
 
     retrieval_scores = []
-
     hit_scores = []
-
     recall_scores = []
-
     mrr_scores = []
 
     answer_scores = []
 
     faithfulness_scores = []
-
     nli_faithfulness_scores = []
 
     unsupported_scores = []
@@ -1270,10 +1335,15 @@ def run_evaluation(
 
         else:
 
+            # IMPORTANT:
+            # Pass retrieved_documents here.
+            # This fixes the previous TypeError.
+
             nli_faithfulness_score = (
                 evaluate_nli_faithfulness(
                     answer,
                     context,
+                    retrieved_documents,
                     llm
                 )
             )
@@ -1764,4 +1834,3 @@ if __name__ == "__main__":
         test_cases,
         document_path
     )
-

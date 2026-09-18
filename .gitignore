@@ -15,10 +15,16 @@ __pycache__/
 faiss_db/
 chroma_db/
 
+# User uploaded documents
+data/uploads/
+
+# Local chat history
+data/chat_history.json
+
 # IDE
 .vscode/
 .idea/
 
 # OS
 .DS_Store
-Thumbs.db
+data/chat_history.json

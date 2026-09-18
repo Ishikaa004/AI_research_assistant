@@ -1,3 +1,12 @@
+streamlit
 langchain
 langchain-groq
+langchain-community
+langchain-core
+faiss-cpu
+rank-bm25
+sentence-transformers
+transformers
+torch
+pymupdf
 python-dotenv
