@@ -24,6 +24,19 @@ from dotenv import load_dotenv
 load_dotenv()
 
 groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
+groq_api_key = st.secrets.get("GROQ_API_KEY")
+
+if not groq_api_key:
+    st.error("GROQ_API_KEY is NOT loaded from Streamlit Secrets.")
+    st.stop()
+
+st.success("GROQ_API_KEY loaded successfully.")
+
+llm = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=0,
+    api_key=groq_api_key
+)
 # ============================================================
 # 1. ENVIRONMENT
 # ============================================================
@@ -57,11 +70,7 @@ embedding_model = create_embedding_model()
 print("Embedding model loaded!")
 
 
-llm = ChatGroq(
-    model="openai/gpt-oss-20b",
-    temperature=0,
-    api_key=groq_api_key
-)
+
 
 print("LLM created!")
 
