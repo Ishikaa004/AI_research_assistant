@@ -1,5 +1,6 @@
 import os
 
+import streamlit as st
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 
@@ -17,35 +18,47 @@ from app.rrf import reciprocal_rank_fusion
 from app.metadata_filter import filter_documents
 from app.memory import ConversationMemory
 
-import os
-import streamlit as st
-from dotenv import load_dotenv
 
-load_dotenv()
-
-groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
-groq_api_key = st.secrets.get("GROQ_API_KEY")
-
-if not groq_api_key:
-    st.error("GROQ_API_KEY is NOT loaded from Streamlit Secrets.")
-    st.stop()
-
-st.success("GROQ_API_KEY loaded successfully.")
-
-llm = ChatGroq(
-    model="openai/gpt-oss-20b",
-    temperature=0,
-    api_key=groq_api_key
-)
 # ============================================================
 # 1. ENVIRONMENT
 # ============================================================
 
 load_dotenv()
 
+# Streamlit Cloud:
+#     st.secrets["GROQ_API_KEY"]
+#
+# Local:
+#     .env -> GROQ_API_KEY
+
+groq_api_key = st.secrets.get(
+    "GROQ_API_KEY",
+    os.getenv("GROQ_API_KEY")
+)
+
+if not groq_api_key:
+    st.error(
+        "GROQ_API_KEY is not configured. "
+        "Add it to Streamlit Secrets or your local .env file."
+    )
+    st.stop()
+
 
 # ============================================================
-# 2. GLOBAL VARIABLES
+# 2. CREATE LLM
+# ============================================================
+
+llm = ChatGroq(
+    model="openai/gpt-oss-20b",
+    temperature=0,
+    api_key=groq_api_key
+)
+
+print("LLM created!")
+
+
+# ============================================================
+# 3. GLOBAL VARIABLES
 # ============================================================
 
 documents = []
@@ -54,13 +67,12 @@ chunks = []
 bm25 = None
 vector_store = None
 rag_chain = None
-llm = None
 
 memory = ConversationMemory()
 
 
 # ============================================================
-# 3. CREATE LLM + EMBEDDING MODEL
+# 4. CREATE EMBEDDING MODEL
 # ============================================================
 
 print("Loading embedding model...")
@@ -70,10 +82,9 @@ embedding_model = create_embedding_model()
 print("Embedding model loaded!")
 
 
-
-
-print("LLM created!")
-
+# ============================================================
+# 5. CREATE RAG CHAIN
+# ============================================================
 
 rag_chain = create_rag_chain(llm)
 
@@ -81,7 +92,7 @@ print("RAG chain created!")
 
 
 # ============================================================
-# 4. LOAD DOCUMENTS
+# 6. LOAD DOCUMENTS
 # ============================================================
 
 def initialize_pipeline(document_paths):
@@ -189,7 +200,7 @@ def initialize_pipeline(document_paths):
 
 
 # ============================================================
-# 5. CHECK WHETHER PIPELINE IS READY
+# 7. CHECK WHETHER PIPELINE IS READY
 # ============================================================
 
 def pipeline_ready():
@@ -203,7 +214,7 @@ def pipeline_ready():
 
 
 # ============================================================
-# 6. EVIDENCE SUFFICIENCY CHECK
+# 8. EVIDENCE SUFFICIENCY CHECK
 # ============================================================
 
 def check_evidence(
@@ -337,7 +348,7 @@ QUESTION:
 
 
 # ============================================================
-# 7. CORE RAG FUNCTION
+# 9. CORE RAG FUNCTION
 # ============================================================
 
 def run_rag(
@@ -358,9 +369,6 @@ def run_rag(
         retrieved_documents:
             Top reranked retrieval results BEFORE
             contextual compression.
-
-            These documents are used for retrieval
-            evaluation such as Hit@K, Recall@K and MRR.
 
         context:
             Final compressed context used by the
@@ -573,9 +581,6 @@ def run_rag(
 
     for query in queries:
 
-        # Use filtered chunks when a source filter
-        # is active.
-
         search_chunks = filtered_chunks
 
         bm25_results = bm25_search(
@@ -679,17 +684,7 @@ def run_rag(
     # RETRIEVAL EVALUATION SET
     # --------------------------------------------------------
 
-    # Keep top 8 after reranking.
-
     results = results[:8]
-
-    # IMPORTANT:
-    #
-    # These are the actual retrieval results that
-    # should be evaluated.
-    #
-    # We make a separate copy so later compression
-    # does not modify the evaluation set.
 
     retrieved_documents = results.copy()
 
@@ -889,12 +884,6 @@ def run_rag(
                 answer
             )
 
-        # IMPORTANT:
-        #
-        # Retrieval evaluation should still receive
-        # retrieved_documents even if compression
-        # failed.
-
         return (
             answer,
             retrieved_documents,
@@ -1032,14 +1021,6 @@ def run_rag(
                 answer
             )
 
-        # IMPORTANT:
-        #
-        # Return retrieved_documents, not
-        # compressed_results.
-        #
-        # Retrieval evaluation should evaluate
-        # retrieval independently from generation.
-
         return (
             answer,
             retrieved_documents,
@@ -1120,7 +1101,7 @@ def run_rag(
 
 
 # ============================================================
-# 8. INTERACTIVE CHAT
+# 10. INTERACTIVE CHAT
 # ============================================================
 
 def chat():
@@ -1277,9 +1258,6 @@ def chat():
             "=============================="
         )
 
-        # The final context contains the exact
-        # compressed evidence used for the answer.
-
         if context:
 
             seen_sources = set()
@@ -1349,7 +1327,7 @@ def chat():
 
 
 # ============================================================
-# 9. START CHAT
+# 11. START CHAT
 # ============================================================
 
 if __name__ == "__main__":
